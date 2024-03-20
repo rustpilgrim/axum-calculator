@@ -8,6 +8,13 @@ struct Parameters {
     second: i32,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+struct CalcParameters {
+    operation: String,
+    first: i32,
+    second: i32,
+}
+
 async fn add_handler(Query(nums): Query<Parameters>) -> Html<String> {
     let result = nums.first + nums.second;
 
@@ -32,10 +39,35 @@ async fn div_handler(Query(nums): Query<Parameters>) -> Html<String> {
     Html(format!("<h1>Division result: {}</h1>", result))
 }
 
+async fn calc_handler(Query(input): Query<CalcParameters>) -> Html<String> {
+    match input.operation.as_str() {
+        "ADD" => {
+            let result = input.first + input.second;
+            Html(format!("<h1>{}</h1>", result))
+        },
+        "SUB" => {
+            let result = input.first - input.second;
+            Html(format!("<h1>{}</h1>", result))
+        },
+        "MUL" => {
+            let result = input.first * input.second;
+            Html(format!("<h1>{}</h1>", result))
+        },
+        "DIV" => {
+            let result = input.first / input.second;
+            Html(format!("<h1>{}</h1>", result))
+        },
+        _ => {
+            Html(format!("<h1>Invalid operation!</h1>"))
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() {
     let app = Router::new()
         .route("/", get(handler))
+        .route("/calc", get(calc_handler))
         .route("/add", get(add_handler))
         .route("/sub", get(sub_handler))
         .route("/mul", get(mul_handler))
